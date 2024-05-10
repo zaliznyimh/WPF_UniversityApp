@@ -96,6 +96,69 @@ public class SearchViewModel : ViewModelBase
         }
     }
 
+    private bool _areBooksVisible;
+    public bool AreBooksVisible
+    {
+        get
+        {
+            return _areBooksVisible;
+        }
+        set
+        {
+            _areBooksVisible = value;
+            OnPropertyChanged(nameof(AreBooksVisible));
+        }
+    }
+
+
+    private bool _areFacultyMembersVisible;
+    public bool AreFacultyMembersVisible
+    {
+        get
+        {
+            return _areFacultyMembersVisible;
+        }
+        set
+        {
+            _areFacultyMembersVisible = value;
+            OnPropertyChanged(nameof(AreFacultyMembersVisible));
+        }
+    }
+
+    private bool _areResearchProjectVisible;
+    public bool AreResearchProjectVisible
+    {
+        get
+        {
+            return _areResearchProjectVisible;
+        }
+        set
+        {
+            _areResearchProjectVisible = value;
+            OnPropertyChanged(nameof(AreResearchProjectVisible));
+        }
+    }
+
+
+    private ObservableCollection<Book>? _books = null;
+    public ObservableCollection<Book>? Books
+    {
+        get
+        {
+            if (_books is null)
+            {
+                _books = new ObservableCollection<Book>();
+                return _books;
+            }
+            return _books;
+        }
+        set
+        {
+            _books = value;
+            OnPropertyChanged(nameof(Books));
+        }
+    }
+
     private ObservableCollection<Student>? _students = null;
     public ObservableCollection<Student>? Students
     {
@@ -134,6 +197,44 @@ public class SearchViewModel : ViewModelBase
         }
     }
 
+    private ObservableCollection<FacultyMember>? _facultyMembers = null;
+    public ObservableCollection<FacultyMember>? FacultyMembers
+    {
+        get
+        {
+            if (_facultyMembers is null)
+            {
+                _facultyMembers = new ObservableCollection<FacultyMember>();
+                return _facultyMembers;
+            }
+            return _facultyMembers;
+        }
+        set
+        {
+            _facultyMembers = value;
+            OnPropertyChanged(nameof(FacultyMembers));
+        }
+    }
+
+    private ObservableCollection<ResearchProject>? _researchProjects = null;
+    public ObservableCollection<ResearchProject>? ResearchProjects
+    {
+        get
+        {
+            if (_researchProjects is null)
+            {
+                _researchProjects = new ObservableCollection<ResearchProject>();
+                return _researchProjects;
+            }
+            return _researchProjects;
+        }
+        set
+        {
+            _researchProjects = value;
+            OnPropertyChanged(nameof(ResearchProjects));
+        }
+    }
+
     private ICommand? _comboBoxSelectionChanged = null;
     public ICommand? ComboBoxSelectionChanged
     {
@@ -161,6 +262,18 @@ public class SearchViewModel : ViewModelBase
             else if (selectedValue == "Subjects")
             {
                 FirstCondition = "attended by Student with PESEL";
+            }
+            else if (selectedValue == "Books")
+            {
+                FirstCondition = "with ISBN";
+            }
+            else if (selectedValue == "Faculty Members")
+            {
+                FirstCondition = "attended by FacultyMember with name";
+            }
+            else if (selectedValue == "Research Projects")
+            {
+                FirstCondition = "with title";
             }
         }
     }
@@ -220,6 +333,58 @@ public class SearchViewModel : ViewModelBase
                 AreSubjectsVisible = true;
             }
         }
+        else if (FirstCondition == "with ISBN")
+        {
+            _context.Database.EnsureCreated();
+            Book? book = _context.Books
+                .Where(b => b.ISBN == SecondCondition)
+                .FirstOrDefault();
+            if (book is not null)
+            {
+                var books = _context.Books.ToList();
+
+                var filteredBooks = books.Where(b => b.ISBN == SecondCondition).ToList();
+
+                Books = new ObservableCollection<Book>(filteredBooks);
+                AreBooksVisible = true;
+            }
+        }
+        else if (FirstCondition == "attended by FacultyMember with name")
+        {
+            _context.Database.EnsureCreated();
+            FacultyMember? facultyMember = _context.FacultyMembers
+                .Where(fm => fm.Name == SecondCondition)
+                .FirstOrDefault();
+            if (facultyMember is not null)
+            {
+                var facultyMemberToShow = _context.FacultyMembers.ToList();
+
+                var filteredFacultyMember = facultyMemberToShow.Where(b => b.Name == SecondCondition).ToList();
+
+                FacultyMembers = new ObservableCollection<FacultyMember>(filteredFacultyMember);
+                AreFacultyMembersVisible = true;
+            }
+        }
+        else if (FirstCondition == "with title")
+        {
+            _context.Database.EnsureCreated();
+            ResearchProject? researchProject = _context.ResearchProjects.Where(s => s.Title == SecondCondition).FirstOrDefault();
+            if (researchProject is not null)
+            {
+                var researchProjects = _context.ResearchProjects
+                    .Include(s => s.Supervisor)
+                    .ToList();
+
+                var supervisorName = researchProject.Supervisor.Select(s => s.Name).ToList();
+
+                var filteredResearchProjects = researchProjects
+                    .Where(rp => rp.Supervisor != null && rp.Supervisor.Any(f => supervisorName.Contains(f.Name)))
+                    .ToList();
+
+                ResearchProjects = new ObservableCollection<ResearchProject>(filteredResearchProjects);
+                AreResearchProjectVisible = true;
+            }
+        }
     }
 
     private ICommand? _edit = null;
@@ -265,6 +430,48 @@ public class SearchViewModel : ViewModelBase
                 {
                     instance.SubjectsSubView = editSubjectViewModel;
                     instance.SelectedTab = 1;
+                }
+            }
+            else if (FirstCondition == "with ISBN")
+            {
+                long bookId = (long)obj;
+                EditBookViewModel editBookViewModel = new EditBookViewModel(_context, _dialogService)
+                {
+                    BookId = bookId
+                };
+                var instance = MainWindowViewModel.Instance();
+                if (instance is not null)
+                {
+                    instance.BooksSubView = editBookViewModel;
+                    instance.SelectedTab = 2;
+                }
+            }
+            else if (FirstCondition == "attended by FacultyMember with name")
+            {
+                long facultyMemberId = (long)obj;
+                EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(_context, _dialogService)
+                {
+                    FacultyMemberId = facultyMemberId
+                };
+                var instance = MainWindowViewModel.Instance();
+                if (instance is not null)
+                {
+                    instance.FacultyMemberSubView = editFacultyMemberViewModel;
+                    instance.SelectedTab = 3;
+                }
+            }
+            else if (FirstCondition == "with title")
+            {
+                long researchProjectId = (long)obj;
+                EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(_context, _dialogService)
+                {
+                    ProjectId = researchProjectId
+                };
+                var instance = MainWindowViewModel.Instance();
+                if (instance is not null)
+                {
+                    instance.ResearchProjectSubView = editResearchProjectViewModel;
+                    instance.SelectedTab = 4;
                 }
             }
         }
@@ -320,6 +527,54 @@ public class SearchViewModel : ViewModelBase
                 _context.Subjects.Remove(subject);
                 _context.SaveChanges();
             }
+            else if (FirstCondition == "with ISBN")
+            {
+                long bookId = (long)obj;
+                Book? book = _context.Books.Find(bookId);
+                if (book is null)
+                {
+                    return;
+                }
+                DialogResult = _dialogService.Show(book.Title);
+                if (DialogResult == false)
+                {
+                    return;
+                }
+                _context.Books.Remove(book);
+                _context.SaveChanges();
+            }
+            else if (FirstCondition == "attended by FacultyMember with name")
+            {
+                long facultyMemberID = (long)obj;
+                FacultyMember? facultyMember = _context.FacultyMembers.Find(facultyMemberID);
+                if (facultyMember is null)
+                {
+                    return;
+                }
+                DialogResult = _dialogService.Show(facultyMember.Name);
+                if (DialogResult == false)
+                {
+                    return;
+                }
+                _context.FacultyMembers.Remove(facultyMember);
+                _context.SaveChanges();
+            }
+            else if (FirstCondition == "with title")
+            {
+                long projectId = (long)obj;
+                ResearchProject? researchProject = _context.ResearchProjects.Find(projectId);
+                if (researchProject is null)
+                {
+                    return;
+                }
+                DialogResult = _dialogService.Show(researchProject.Title);
+                if (DialogResult == false)
+                {
+                    return;
+                }
+                _context.ResearchProjects.Remove(researchProject);
+                _context.SaveChanges();
+            }
         }
     }
 
@@ -331,5 +586,8 @@ public class SearchViewModel : ViewModelBase
         IsVisible = false;
         AreStudentsVisible = false;
         AreSubjectsVisible = false;
+        AreBooksVisible = false;
+        AreFacultyMembersVisible = false;
+        AreResearchProjectVisible = false;
     }
 }

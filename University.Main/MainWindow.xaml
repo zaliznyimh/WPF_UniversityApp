@@ -22,14 +22,14 @@
             <TabItem Header="Subjects" Tag="&#xE82D;">
                 <ContentControl Content="{Binding SubjectsSubView}" />
             </TabItem>
+            <TabItem Header="Books" Tag="&#xE773;">
+                <ContentControl Content="{Binding BooksSubView}" />
+            </TabItem>
             <TabItem Header="FacultyMembers" Tag="&#xE82D;">
                 <ContentControl Content="{Binding FacultyMemberSubView}" />
             </TabItem>
             <TabItem Header="ResearchProjects" Tag="&#xE773;">
                 <ContentControl Content="{Binding ResearchProjectSubView}" />
-            </TabItem>
-            <TabItem Header="Books" Tag="&#xE773;">
-                <ContentControl Content="{Binding BooksSubView}" />
             </TabItem>
             <TabItem Header="Search" Tag="&#xE773;">
                 <ContentControl Content="{Binding SearchSubView}" />
