@@ -38,9 +38,9 @@ public class ResearchProjectsTest
             context.Database.EnsureDeleted();
             List<ResearchProject> researchProjects = new List<ResearchProject>
             {
-                new ResearchProject { ProjectId = 1, Title = "Exploration of Artificial Intelligence Applications", Description = "Exploring various applications of AI", TeamMember = "Oleksandra, Eugenia, Stanisіaw",
+                new ResearchProject { ProjectId = 1, Title = "Exploration of Artificial Intelligence Applications", Description = "Exploring various applications of AI",
                                       StartDate = new DateTime(2023, 1, 1), EndDate = new DateTime(2024, 1, 1), Budget = 8000 },
-                new ResearchProject { ProjectId = 2, Title = "Investigation of Climate Change Effects", Description = "Studying the impact of climate change on ecosystems", TeamMember = "Alla, Piotr, Felicja",
+                new ResearchProject { ProjectId = 2, Title = "Investigation of Climate Change Effects", Description = "Studying the impact of climate change on ecosystems",
                                       StartDate = new DateTime(2022, 1, 1), EndDate = new DateTime(2025, 1, 1), Budget = 10000 }
             };
             List<FacultyMember> facultyMembers = new List<FacultyMember>
@@ -64,14 +64,13 @@ public class ResearchProjectsTest
             {
                 Title = "Study of Urbanization Trends",
                 Description = "Analyzing patterns of urbanization, urban growth, and their impact on infrastructure",
-                TeamMember = "Michał, Radosław", 
                 StartDate = new DateTime(2022, 1, 1), 
                 EndDate = new DateTime(2023, 1, 1),
                 Budget = 4500
             };
             addResearchProjectViewModel.Save.Execute(null);
 
-            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.TeamMember == "Michał, Radosław" && rp.Budget == 4500);
+            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500);
             Assert.IsTrue(isNewResearchProjectExist);
         }
     }
@@ -91,7 +90,6 @@ public class ResearchProjectsTest
             {
                 Title = "Study of Urbanization Trends",
                 Description = "Analyzing patterns of urbanization, urban growth, and their impact on infrastructure",
-                TeamMember = "Michał, Radosław",
                 StartDate = new DateTime(2022, 1, 1),
                 EndDate = new DateTime(2023, 1, 1),
                 Budget = 4500,
@@ -103,7 +101,7 @@ public class ResearchProjectsTest
             addResearchProjectViewModel.Save.Execute(null);
 
             // Assert
-            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.TeamMember == "Michał, Radosław" && rp.Budget == 4500 && rp.Supervisor.Any());
+            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500 && rp.Supervisor.Any());
             Assert.IsTrue(isNewResearchProjectExist);
         }
     }
@@ -121,9 +119,8 @@ public class ResearchProjectsTest
             // Act
             AddResearchProjectViewModel addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogService)
             {
-                Title = "Study of Urbanization Trends",
+                Title = "",
                 Description = "Analyzing patterns of urbanization, urban growth, and their impact on infrastructure",
-                TeamMember = "",
                 StartDate = new DateTime(2022, 1, 1),
                 EndDate = new DateTime(2023, 1, 1),
                 AssignedFacultyMembers = new ObservableCollection<FacultyMember>
@@ -134,7 +131,7 @@ public class ResearchProjectsTest
             addResearchProjectViewModel.Save.Execute(null);
 
             // Assert
-            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.TeamMember == "Michał, Radosław" && rp.Budget == 4500 && rp.Supervisor.Any());
+            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500 && rp.Supervisor.Any());
             Assert.IsFalse(isNewResearchProjectExist);
         }
     }

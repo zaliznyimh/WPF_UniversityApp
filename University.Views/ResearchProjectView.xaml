@@ -36,10 +36,20 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Members" DisplayMemberBinding="{Binding TeamMember}" Width="auto">
+                    <GridViewColumn Header="Team Members" Width="200">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding TeamMember}" />
+                                <Expander Header="View"  Padding="2">
+                                    <ItemsControl ItemsSource="{Binding TeamMember}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,5">
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Expander>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

@@ -54,13 +54,6 @@ namespace University.ViewModels
                         return "Invalid value of budget";
                     }
                 }
-                if (columnName == "TeamMember")
-                {
-                    if (string.IsNullOrEmpty(TeamMember))
-                    {
-                        return "TeamMembers are required";
-                    }
-                }
                 return string.Empty;
             }
         }
@@ -196,6 +189,25 @@ namespace University.ViewModels
             }
         }
 
+        private ObservableCollection<Student>? _assignedStudents = null;
+        public ObservableCollection<Student> AssignedStudents
+        {
+            get
+            {
+                if (_assignedStudents is null)
+                {
+                    _assignedStudents = LoadStudents();
+                    return _assignedStudents;
+                }
+                return _assignedStudents;
+            }
+            set
+            {
+                _assignedStudents = value;
+                OnPropertyChanged(nameof(AssignedStudents));
+            }
+        }
+
         private ICommand? _back = null;
         public ICommand Back
         {
@@ -243,7 +255,7 @@ namespace University.ViewModels
             {
                 Title = this.Title,
                 Description = this.Description,
-                TeamMember = this.TeamMember,
+                TeamMember = AssignedStudents?.Where(s => s.IsSelected).ToList(),
                 StartDate = this.StartDate,
                 EndDate = this.EndDate,
                 Budget = this.Budget,
@@ -259,7 +271,7 @@ namespace University.ViewModels
         private bool IsValid()
         {
     
-            string[] properties = { "Title", "Description", "TeamMember", "Budget"};
+            string[] properties = { "Title", "Description", "Budget"};
             foreach (string property in properties)
             {
                 if (!string.IsNullOrEmpty(this[property]))
@@ -279,6 +291,12 @@ namespace University.ViewModels
             return _context.FacultyMembers.Local.ToObservableCollection();
         }
 
+        private ObservableCollection<Student> LoadStudents()
+        {
+            _context.Database.EnsureCreated();
+            _context.Students.Load();
+            return _context.Students.Local.ToObservableCollection();
+        }
 
         /// <summary>
         /// Ctor

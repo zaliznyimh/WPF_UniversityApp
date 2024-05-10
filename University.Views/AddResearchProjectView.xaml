@@ -14,16 +14,15 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Button Content="Back" Grid.Row="0" Grid.Column="0" Command="{Binding Back}" Margin="5,5,5,0" Width="100" HorizontalAlignment="Left" Style="{StaticResource PrimaryButton}" Tag="&#xE72B;" />
-        <Button Content="Save" Grid.Row="0" Grid.Column="1" Command="{Binding Save}" Margin="5,5,5,0" Width="100" HorizontalAlignment="Right" Style="{StaticResource PrimaryButton}" Tag="&#xE74E;" />
-        <GroupBox Header="Project Details" Grid.Row="1" Grid.Column="0" Margin="5" Padding="10">
+        <Button Content="Back" Grid.Row="0" Grid.Column="0" Command="{Binding Back}" Margin="5,5,0,0" Width="100" HorizontalAlignment="Left" Style="{StaticResource PrimaryButton}" Tag="&#xE72B;" />
+        <Button Content="Save" Grid.Row="0" Grid.Column="1" Command="{Binding Save}" Margin="0,5,5,0" Width="100" HorizontalAlignment="Right" Style="{StaticResource PrimaryButton}" Tag="&#xE74E;" />
+        <GroupBox Header="Project Details" Grid.Row="1" Grid.Column="0" Margin="5,5,5,5" Padding="10" Grid.RowSpan="2">
             <StackPanel>
                 <WrapPanel Margin="0,0,0,5">
                     <TextBlock Text="Title" Style="{StaticResource PrimaryTextBlock}" />
@@ -32,10 +31,6 @@
                 <WrapPanel Margin="0,0,0,5">
                     <TextBlock Text="Description" Style="{StaticResource PrimaryTextBlock}" />
                     <TextBox Text="{Binding Description, ValidatesOnDataErrors=True}" Style="{StaticResource PrimaryTextBox}" />
-                </WrapPanel>
-                <WrapPanel Margin="0,0,0,5">
-                    <TextBlock Text="Members" Style="{StaticResource PrimaryTextBlock}" />
-                    <TextBox Text="{Binding TeamMember, ValidatesOnDataErrors=True}" Style="{StaticResource PrimaryTextBox}" />
                 </WrapPanel>
                 <WrapPanel Margin="0,0,0,5">
                     <TextBlock Text="Start Date" Style="{StaticResource PrimaryTextBlock}" />
@@ -51,7 +46,7 @@
                 </WrapPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Header="Assigned FacultyMembers" Grid.Row="1" Grid.Column="1" Margin="0,5,5,5" Padding="10">
+        <GroupBox Header="Assigned FacultyMembers" Grid.Row="1" Grid.Column="1" Margin="0,5,5,80" Padding="10">
             <ItemsControl ItemsSource="{Binding AssignedFacultyMembers}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -75,6 +70,29 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </GroupBox>
-        <TextBlock Text="{Binding Response}" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+        <GroupBox Header="Assigned Students" Grid.Row="1" Grid.Column="1" Margin="0,88,5,5" Padding="10">
+            <ItemsControl ItemsSource="{Binding AssignedStudents}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,0,0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat=" {0} ({1}, {2})">
+                                        <Binding Path="Name"/>
+                                        <Binding Path="StudentId"/>
+                                        <Binding Path="PESEL"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <CheckBox IsChecked="{Binding IsSelected}" Grid.Column="1" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </GroupBox>
     </Grid>
 </UserControl>

@@ -226,6 +226,25 @@ namespace University.ViewModels
             }
         }
 
+        private ObservableCollection<Student>? _assignedStudents = null;
+        public ObservableCollection<Student> AssignedStudents
+        {
+            get
+            {
+                if (_assignedStudents is null)
+                {
+                    _assignedStudents = LoadStudents();
+                    return _assignedStudents;
+                }
+                return _assignedStudents;
+            }
+            set
+            {
+                _assignedStudents = value;
+                OnPropertyChanged(nameof(AssignedStudents));
+            }
+        }
+
         private ICommand? _back = null;
         public ICommand Back
         {
@@ -268,6 +287,13 @@ namespace University.ViewModels
             return _context.FacultyMembers.Local.ToObservableCollection();
         }
 
+        private ObservableCollection<Student> LoadStudents()
+        {
+            _context.Database.EnsureCreated();
+            _context.Students.Load();
+            return _context.Students.Local.ToObservableCollection();
+        }
+
         private void SaveData(object? obj)
         {
             if (!IsValid())
@@ -283,7 +309,7 @@ namespace University.ViewModels
 
             _researchProject.Title = Title;
             _researchProject.Description = Description;
-            _researchProject.TeamMember = TeamMember;
+            _researchProject.TeamMember = AssignedStudents.Where(s => s.IsSelected).ToList();
             _researchProject.Supervisor = AssignedFacultyMembers.Where(s => s.IsSelected).ToList();
             _researchProject.StartDate = StartDate;
             _researchProject.EndDate = EndDate;
@@ -308,10 +334,10 @@ namespace University.ViewModels
             }
             this.Title = _researchProject.Title;
             this.Description = _researchProject.Description;
-            this.TeamMember = _researchProject.TeamMember;
             this.StartDate = _researchProject.StartDate;
             this.EndDate = _researchProject.EndDate;
             this.Budget = _researchProject.Budget;
+
             if (_researchProject.Supervisor is null)
             {
                 return;
@@ -328,11 +354,29 @@ namespace University.ViewModels
                     }
                 }
             }
+
+            if (_researchProject.TeamMember is null)
+            {
+                return;
+            }
+            foreach (Student student in _researchProject.TeamMember)
+            {
+                if (student is not null && AssignedStudents is not null)
+                {
+                    var assignedStudents = AssignedStudents
+                        .FirstOrDefault(s => s.StudentId == student.StudentId);
+                    if (assignedStudents is not null)
+                    {
+                        assignedStudents.IsSelected = true;
+                    }
+                }
+            }
+
         }
 
         private bool IsValid()
         {
-            string[] properties = { "Title", "Budget", "Description", "TeamMember"};
+            string[] properties = { "Title", "Budget", "Description"};
             foreach (string property in properties)
             {
                 if (!string.IsNullOrEmpty(this[property]))

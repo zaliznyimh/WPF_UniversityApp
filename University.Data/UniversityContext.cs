@@ -55,15 +55,15 @@ namespace University.Data
 
             modelBuilder.Entity<ResearchProject>().HasData(
                 new ResearchProject { ProjectId = 1, Title = "Quantum Computing Research", Description = "Exploring the potential of quantum computing in solving complex computational problems.",
-                                      TeamMember = "Isaac Chuang, Wolfgang Ketterle", StartDate = new DateTime(2024, 1, 15), 
+                                      StartDate = new DateTime(2024, 1, 15), 
                                       EndDate = new DateTime(2025, 1, 15), Budget = 50000 },
                 
                 new ResearchProject { ProjectId = 2, Title = "Artificial Intelligence Ethics Study", Description = "Investigating ethical considerations in the development and deployment of artificial intelligence technologies.",
-                                      TeamMember = "Sam Altman, Paul Graham", StartDate = new DateTime(2024, 3, 10),
+                                      StartDate = new DateTime(2024, 3, 10),
                                       EndDate = new DateTime(2025, 3, 10), Budget = 75000 },
                 
                 new ResearchProject { ProjectId = 3, Title = "Space Exploration Mission Planning", Description = "Planning and simulation of manned missions to Mars and beyond.",
-                                      TeamMember = "Michael Johnson, Albert Einstein", StartDate = new DateTime(2024, 5, 20),
+                                      StartDate = new DateTime(2024, 5, 20),
                                       EndDate = new DateTime(2025, 5, 20), Budget = 100000 } );
 
             modelBuilder.Entity<Book>().HasData(

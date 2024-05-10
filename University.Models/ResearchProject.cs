@@ -16,7 +16,8 @@ public class ResearchProject
     public long ProjectId { get; set; } = 0;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string TeamMember { get; set; } = string.Empty;
+    // public string TeamMember { get; set; } = string.Empty;
+    public virtual ICollection<Student>? TeamMember { get; set; } = null;
     public virtual ICollection<FacultyMember>? Supervisor { get; set; } = null;
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
