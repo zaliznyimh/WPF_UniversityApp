@@ -15,20 +15,26 @@ namespace University.Tests
     [TestClass]
     public class BooksTest
     {
-        private IDatabaseService _databaseService;
-        private IDialogService _dialogService;
-        private DbContextOptions<UniversityContext> _options;
+
         private Mock<IDialogService> _dialogServiceMock;
+        private DbContextOptions<UniversityContext> _options;
+        private IDatabaseService _databaseService;
+        private UniversityContext _context;
 
         [TestInitialize()]
         public void Initialize()
         {
+
             _options = new DbContextOptionsBuilder<UniversityContext>()
                 .UseInMemoryDatabase(databaseName: "UniversityTestDB")
                 .Options;
+
+            _context = new UniversityContext(_options);
+
             SeedTestDB();
-            _dialogService = new DialogService();
             _dialogServiceMock = new Mock<IDialogService>();
+            _dialogServiceMock.Setup(q => q.Show(It.IsAny<string>())).Returns(true);
+            _databaseService = new DatabaseService(_context, _dialogServiceMock.Object);
         }
 
         private void SeedTestDB()
@@ -52,7 +58,7 @@ namespace University.Tests
         {
             using UniversityContext context = new UniversityContext(_options);
             {
-                BooksViewModel booksViewModel = new BooksViewModel(context, _dialogService);
+                BooksViewModel booksViewModel = new BooksViewModel(context, _dialogServiceMock.Object, _databaseService);
                 bool hasData = booksViewModel.Books.Any();
                 Assert.IsTrue(hasData);
             }
@@ -64,7 +70,7 @@ namespace University.Tests
             using UniversityContext context = new UniversityContext(_options);
             {
                 // Arrange
-                AddBookViewModel addBookViewModel = new AddBookViewModel(context, _dialogService)
+                AddBookViewModel addBookViewModel = new AddBookViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     Title = "New Book Title",
                     Author = "New Author",
@@ -89,7 +95,7 @@ namespace University.Tests
             using UniversityContext context = new UniversityContext(_options);
             {
                 // Arrange
-                AddBookViewModel addBookViewModel = new AddBookViewModel(context, _dialogService)
+                AddBookViewModel addBookViewModel = new AddBookViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     Author = "Author without Title",
                     Publisher = "Publisher without Title",
@@ -109,27 +115,23 @@ namespace University.Tests
         [TestMethod]
         public void EditBook_ValidBookProperties_ReturnTrue()
         {
-            using (UniversityContext context = new UniversityContext(_options))
-            {
+            
                 // Arrrange
-                var viewModel = new BooksViewModel(context, _dialogService);
-                var bookToEdit = context.Books.Find((long)2);
+                var bookToEdit = _context.Books.Find((long)2);
 
                 // Act
-                EditBookViewModel editBookViewModel = new EditBookViewModel(context, _dialogService)
+                EditBookViewModel editBookViewModel = new EditBookViewModel(_context, _dialogServiceMock.Object, _databaseService)
                 {
                     BookId = 2,
                     Genre = "NewGenre",
                     Description = "Description"
                 };
 
-                editBookViewModel.Save.Execute(bookToEdit);
-                viewModel.Edit.Execute(bookToEdit.BookId);
-                var editedBook = context.Books.Find((long)2);
+                editBookViewModel.Save.Execute(null);
 
                 // Assert
-                Assert.AreEqual("NewGenre", editedBook.Genre);
-            }
+                var updatedBook = _context.Books.Find((long)2);
+                Assert.AreEqual("NewGenre", updatedBook.Genre);
         }
 
         [TestMethod]
@@ -139,10 +141,10 @@ namespace University.Tests
             {
                 // Arrange
                 long IdExistingOfBook = 2;
-                var viewModel = new BooksViewModel(context, _dialogService);
+                var viewModel = new BooksViewModel(context, _dialogServiceMock.Object, _databaseService);
                 var bookToEdit = context.Books.Find(IdExistingOfBook);
 
-                EditBookViewModel editBookViewModel = new EditBookViewModel(context, _dialogService)
+                EditBookViewModel editBookViewModel = new EditBookViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     BookId = 3,
                     Genre = "NewGenre",
@@ -166,8 +168,7 @@ namespace University.Tests
             {
                 // Arrange
                 long IdExistingBookToRemove = 2;
-                _dialogServiceMock.Setup(q => q.Show(It.IsAny<string>())).Returns(true);
-                var viewModel = new BooksViewModel(context, _dialogServiceMock.Object);
+                var viewModel = new BooksViewModel(_context, _dialogServiceMock.Object, _databaseService);
 
                 // Act
                 viewModel.Remove.Execute(IdExistingBookToRemove);
@@ -185,7 +186,7 @@ namespace University.Tests
                 // Arrange
                 long IdExistingBookToRemove = 3;
                 _dialogServiceMock.Setup(q => q.Show(It.IsAny<string>())).Returns(false);
-                var viewModel = new BooksViewModel(context, _dialogServiceMock.Object);
+                var viewModel = new BooksViewModel(context, _dialogServiceMock.Object, _databaseService);
 
                 // Act
                 viewModel.Remove.Execute(IdExistingBookToRemove);
@@ -201,7 +202,7 @@ namespace University.Tests
             using (UniversityContext context = new UniversityContext(_options))
             {
                 // Arrange
-                var viewModel = new AddBookViewModel(context, _dialogService)
+                var viewModel = new AddBookViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     Title = "Test Title",
                     Author = "Test Author",
@@ -226,9 +227,8 @@ namespace University.Tests
             using (UniversityContext context = new UniversityContext(_options))
             {
                 // Arrange
-                var viewModel = new AddBookViewModel(context, _dialogServiceMock.Object)
+                var viewModel = new AddBookViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
-                    // Здесь не устанавливаем значения для обязательных полей
                     Title = "",
                     Author = "",
                     Publisher = "",

@@ -16,9 +16,10 @@ namespace University.Tests;
 [TestClass]
 public class ResearchProjectsTest
 {
-    private IDialogService _dialogService;
     private DbContextOptions<UniversityContext> _options;
     private Mock<IDialogService> _dialogServiceMock;
+    private UniversityContext _context;
+    private IDatabaseService _databaseService;
 
     [TestInitialize()]
     public void Initialize()
@@ -26,9 +27,12 @@ public class ResearchProjectsTest
         _options = new DbContextOptionsBuilder<UniversityContext>()
             .UseInMemoryDatabase(databaseName: "UniversityTestDB")
             .Options;
+        _context = new UniversityContext(_options);
         SeedTestDB();
-        _dialogService = new DialogService();
+
         _dialogServiceMock = new Mock<IDialogService>();
+        _dialogServiceMock.Setup(q => q.Show(It.IsAny<string>())).Returns(true);
+        _databaseService = new DatabaseService(_context, _dialogServiceMock.Object);
     }
 
     private void SeedTestDB()
@@ -40,7 +44,7 @@ public class ResearchProjectsTest
             {
                 new ResearchProject { ProjectId = 1, Title = "Exploration of Artificial Intelligence Applications", Description = "Exploring various applications of AI",
                                       StartDate = new DateTime(2023, 1, 1), EndDate = new DateTime(2024, 1, 1), Budget = 8000 },
-                new ResearchProject { ProjectId = 2, Title = "Investigation of Climate Change Effects", Description = "Studying the impact of climate change on ecosystems",
+                new ResearchProject { ProjectId = 10, Title = "Investigation of Climate Change Effects", Description = "Studying the impact of climate change on ecosystems",
                                       StartDate = new DateTime(2022, 1, 1), EndDate = new DateTime(2025, 1, 1), Budget = 10000 }
             };
             List<FacultyMember> facultyMembers = new List<FacultyMember>
@@ -60,7 +64,7 @@ public class ResearchProjectsTest
     {
         using UniversityContext context = new UniversityContext(_options);
         {
-            AddResearchProjectViewModel addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogService)
+            AddResearchProjectViewModel addResearchProjectViewModel = new AddResearchProjectViewModel(_context, _dialogServiceMock.Object, _databaseService)
             {
                 Title = "Study of Urbanization Trends",
                 Description = "Analyzing patterns of urbanization, urban growth, and their impact on infrastructure",
@@ -78,15 +82,13 @@ public class ResearchProjectsTest
     [TestMethod]
     public void AddReseachProject_WithFacultyMembers_ReturnTrue()
     {
-        using UniversityContext context = new UniversityContext(_options);
-        {
             // Arrange
-            long IdFacultyMember = 1;
-            FacultyMember facultyMember = context.FacultyMembers.Find(IdFacultyMember);
+            long IdFacultyMember = 2;
+            FacultyMember facultyMember = _context.FacultyMembers.Find(IdFacultyMember);
             facultyMember.IsSelected = true;
 
             // Act
-            AddResearchProjectViewModel addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogService)
+            AddResearchProjectViewModel addResearchProjectViewModel = new AddResearchProjectViewModel(_context, _dialogServiceMock.Object, _databaseService)
             {
                 Title = "Study of Urbanization Trends",
                 Description = "Analyzing patterns of urbanization, urban growth, and their impact on infrastructure",
@@ -96,28 +98,28 @@ public class ResearchProjectsTest
                 AssignedFacultyMembers = new ObservableCollection<FacultyMember>
                 {
                     facultyMember
-                }   
+                }
             };
+            addResearchProjectViewModel.AssignedFacultyMembers.Add(facultyMember);
+
+
             addResearchProjectViewModel.Save.Execute(null);
 
             // Assert
-            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500 && rp.Supervisor.Any());
+            bool isNewResearchProjectExist = _context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500 && rp.Supervisor.Any());
             Assert.IsTrue(isNewResearchProjectExist);
-        }
     }
 
     [TestMethod]
     public void AddReseachProject_WithFacultyMembers_ReturnFalse()
     {
-        using UniversityContext context = new UniversityContext(_options);
-        {
             // Arrange
-            long IdFacultyMember = 1;
-            FacultyMember facultyMember = context.FacultyMembers.Find(IdFacultyMember);
+            long IdFacultyMember = 2;
+            FacultyMember facultyMember = _context.FacultyMembers.Find(IdFacultyMember);
             facultyMember.IsSelected = true;
 
             // Act
-            AddResearchProjectViewModel addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogService)
+            AddResearchProjectViewModel addResearchProjectViewModel = new AddResearchProjectViewModel(_context, _dialogServiceMock.Object, _databaseService)
             {
                 Title = "",
                 Description = "Analyzing patterns of urbanization, urban growth, and their impact on infrastructure",
@@ -131,9 +133,9 @@ public class ResearchProjectsTest
             addResearchProjectViewModel.Save.Execute(null);
 
             // Assert
-            bool isNewResearchProjectExist = context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500 && rp.Supervisor.Any());
+            bool isNewResearchProjectExist = _context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500 && rp.Supervisor.Any());
             Assert.IsFalse(isNewResearchProjectExist);
-        }
+
     }
 
     [TestMethod]
@@ -143,21 +145,19 @@ public class ResearchProjectsTest
         {
             // Arrrange
             long IdResearchProjectToEdit = 1;
-            var viewModel = new ResearchProjectViewModel(context, _dialogService);
             var researchProjectEdit = context.ResearchProjects.Find(IdResearchProjectToEdit);
 
             // Act
-            EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(context, _dialogService)
+            EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService)
             {
                 ProjectId = 1,
                 Budget = 9500
             };
 
-            editResearchProjectViewModel.Save.Execute(researchProjectEdit);
-            viewModel.Edit.Execute(researchProjectEdit.ProjectId);
+            editResearchProjectViewModel.Save.Execute(null);
             
             // Assert
-            var editedtResearchProject = context.ResearchProjects.Find(IdResearchProjectToEdit);
+            var editedtResearchProject = _context.ResearchProjects.Find((long)1);
             Assert.AreEqual(9500, editedtResearchProject.Budget);
         }
     }
@@ -169,11 +169,11 @@ public class ResearchProjectsTest
         {
             // Arrrange
             long IdResearchProjectToEdit = 1;
-            var viewModel = new ResearchProjectViewModel(context, _dialogService);
+            var viewModel = new ResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService);
             var researchProjectEdit = context.ResearchProjects.Find(IdResearchProjectToEdit);
 
             // Act
-            EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(context, _dialogService)
+            EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService)
             {
                 ProjectId = 3,
                 Budget = 9500
@@ -195,8 +195,7 @@ public class ResearchProjectsTest
         {
             // Arrange
             long IdResearchProjectRemove = 2;
-            _dialogServiceMock.Setup(qq => qq.Show(It.IsAny<string>())).Returns(true);
-            var viewModel = new ResearchProjectViewModel(context, _dialogServiceMock.Object);
+            var viewModel = new ResearchProjectViewModel(_context, _dialogServiceMock.Object, _databaseService);
 
             // Act
             viewModel.Remove.Execute(IdResearchProjectRemove);
@@ -212,9 +211,9 @@ public class ResearchProjectsTest
         using (UniversityContext context = new UniversityContext(_options))
         {
             // Arrange
-            long IdResearchProjectRemove = 2;
+            long IdResearchProjectRemove = 10;
             _dialogServiceMock.Setup(qq => qq.Show(It.IsAny<string>())).Returns(false);
-            var viewModel = new ResearchProjectViewModel(context, _dialogServiceMock.Object);
+            var viewModel = new ResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService);
 
             // Act
             viewModel.Remove.Execute(IdResearchProjectRemove);
@@ -228,7 +227,7 @@ public class ResearchProjectsTest
     {
         using UniversityContext context = new UniversityContext(_options);
         {
-            var addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogService)
+            var addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService)
             {
                 Title = "Study of Urbanization Trends",
                 Description = "Analyzing patterns of urbanization, urban growth, and their impact on infrastructure",
@@ -250,7 +249,7 @@ public class ResearchProjectsTest
     {
         using UniversityContext context = new UniversityContext(_options);
         {
-            var addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogService)
+            var addResearchProjectViewModel = new AddResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService)
             {
                 Title = "",
                 Description = "",

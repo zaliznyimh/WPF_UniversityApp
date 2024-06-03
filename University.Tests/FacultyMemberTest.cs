@@ -17,19 +17,25 @@ public class FacultyMemberTest
     [TestClass]
     public class BooksTest
     {
-        private IDialogService _dialogService;
-        private DbContextOptions<UniversityContext> _options;
+
         private Mock<IDialogService> _dialogServiceMock;
+        private DbContextOptions<UniversityContext> _options;
+        private IDatabaseService _databaseService;
+        private UniversityContext _context;
 
         [TestInitialize()]
         public void Initialize()
         {
+
             _options = new DbContextOptionsBuilder<UniversityContext>()
                 .UseInMemoryDatabase(databaseName: "UniversityTestDB")
                 .Options;
+            _context = new UniversityContext(_options);
             SeedTestDB();
-            _dialogService = new DialogService();
+
             _dialogServiceMock = new Mock<IDialogService>();
+            _dialogServiceMock.Setup(q => q.Show(It.IsAny<string>())).Returns(true);
+            _databaseService = new DatabaseService(_context, _dialogServiceMock.Object);
         }
 
         private void SeedTestDB()
@@ -52,7 +58,7 @@ public class FacultyMemberTest
         {
             using UniversityContext context = new UniversityContext(_options);
             {
-                FacultyMemberViewModel facultyMemberViewModel = new FacultyMemberViewModel(context, _dialogService);
+                FacultyMemberViewModel facultyMemberViewModel = new FacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService);
                 bool hasData = facultyMemberViewModel.FacultyMembers.Any();
                 Assert.IsTrue(hasData);
             }
@@ -63,7 +69,7 @@ public class FacultyMemberTest
         {
             using UniversityContext context = new UniversityContext(_options);
             {
-                AddFacultyMemberViewModel addFacultyMemberViewModel = new AddFacultyMemberViewModel(context, _dialogService)
+                AddFacultyMemberViewModel addFacultyMemberViewModel = new AddFacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     Name = "Stephen Hawking", 
                     Age = 76,
@@ -89,7 +95,7 @@ public class FacultyMemberTest
             using UniversityContext context = new UniversityContext(_options);
             {
                 // Arrange
-                AddFacultyMemberViewModel addFacultyMemberViewModel = new AddFacultyMemberViewModel(context, _dialogService)
+                AddFacultyMemberViewModel addFacultyMemberViewModel = new AddFacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     Age = 76,
                     Gender = "Male",
@@ -114,22 +120,20 @@ public class FacultyMemberTest
             {
                 // Arrrange
                 long IdFacultyMemberToEdit = 1;
-                var viewModel = new FacultyMemberViewModel(context, _dialogService);
                 var facultyMemberToEdit = context.FacultyMembers.Find(IdFacultyMemberToEdit);
 
                 // Act
-                EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(context, _dialogService)
+                EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     FacultyMemberId = 1,
                     Department = "Information Technology"
                 };
 
-                editFacultyMemberViewModel.Save.Execute(facultyMemberToEdit);
-                viewModel.Edit.Execute(facultyMemberToEdit.FacultyMemberId);
-                var editedFacultyMember = context.FacultyMembers.Find(IdFacultyMemberToEdit);
+                editFacultyMemberViewModel.Save.Execute(null);
 
                 // Assert
-                Assert.AreEqual("Information Technology", editedFacultyMember.Department);
+                var updatedFacultyMember = _context.FacultyMembers.Find((long)1);
+                Assert.AreEqual("Information Technology", updatedFacultyMember.Department);
             }
         }
 
@@ -140,10 +144,10 @@ public class FacultyMemberTest
             {
                 // Arrange
                 long IdFacultyMemberToEdit = 1;
-                var viewModel = new FacultyMemberViewModel(context, _dialogService);
+                var viewModel = new FacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService);
                 var facultyMemberToEdit = context.FacultyMembers.Find(IdFacultyMemberToEdit);
 
-                EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(context, _dialogService)
+                EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     FacultyMemberId = 20,
                     Department = "Information Technology"
@@ -166,8 +170,7 @@ public class FacultyMemberTest
             {
                 // Arrange
                 long IdExistingMemberToRemove = 2;
-                _dialogServiceMock.Setup(q => q.Show(It.IsAny<string>())).Returns(true);
-                var viewModel = new FacultyMemberViewModel(context, _dialogServiceMock.Object);
+                var viewModel = new FacultyMemberViewModel(_context, _dialogServiceMock.Object, _databaseService);
 
                 // Act
                 viewModel.Remove.Execute(IdExistingMemberToRemove);
@@ -185,7 +188,7 @@ public class FacultyMemberTest
                 // Arrange
                 long IdExistingMemberToRemove = 2;
                 _dialogServiceMock.Setup(q => q.Show(It.IsAny<string>())).Returns(false);
-                var viewModel = new FacultyMemberViewModel(context, _dialogServiceMock.Object);
+                var viewModel = new FacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService);
 
                 // Act
                 viewModel.Remove.Execute(IdExistingMemberToRemove);
@@ -201,7 +204,7 @@ public class FacultyMemberTest
             using (UniversityContext context = new UniversityContext(_options))
             {
                 // Arrange
-                var viewModel = new AddFacultyMemberViewModel(context, _dialogService)
+                var viewModel = new AddFacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     Name = "Marie Curie",
                     Age = 66,
@@ -226,7 +229,7 @@ public class FacultyMemberTest
             using (UniversityContext context = new UniversityContext(_options))
             {
                 // Arrange
-                var viewModel = new AddFacultyMemberViewModel(context, _dialogService)
+                var viewModel = new AddFacultyMemberViewModel(context, _dialogServiceMock.Object, _databaseService)
                 {
                     Gender = "",
                     Position = "",
