@@ -127,11 +127,11 @@ public class MainWindowViewModel : ViewModelBase
             _instance = this;
         }
 
-        FacultyMemberSubView = new FacultyMemberViewModel(_context, _dialogService);
+        FacultyMemberSubView = new FacultyMemberViewModel(_context, _dialogService, _databaseService);
         StudentsSubView = new StudentsViewModel(_context, _dialogService);
         SubjectsSubView = new SubjectsViewModel(_context, _dialogService);
         SearchSubView = new SearchViewModel(_context, _dialogService, _databaseService);
-        ResearchProjectSubView = new ResearchProjectViewModel(_context, _dialogService);
+        ResearchProjectSubView = new ResearchProjectViewModel(_context, _dialogService, _databaseService);
         BooksSubView = new BooksViewModel(_context, _dialogService, _databaseService);
     }
 }

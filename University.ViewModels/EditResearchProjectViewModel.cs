@@ -15,12 +15,15 @@ namespace University.ViewModels
     {
         private readonly UniversityContext _context;
         private readonly IDialogService _dialogService;
+        private readonly IDatabaseService _databaseService;
+        
         private ResearchProject? _researchProject = new ResearchProject();
 
-        public EditResearchProjectViewModel(UniversityContext context, IDialogService dialogService)
+        public EditResearchProjectViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
         {
             _context = context;
             _dialogService = dialogService;
+            _databaseService = databaseService;
         }
 
         /// <summary>
@@ -263,7 +266,7 @@ namespace University.ViewModels
             var instance = MainWindowViewModel.Instance();
             if (instance is not null)
             {
-                instance.ResearchProjectSubView = new ResearchProjectViewModel(_context, _dialogService);
+                instance.ResearchProjectSubView = new ResearchProjectViewModel(_context, _dialogService, _databaseService);
             }
         }
 
@@ -315,8 +318,7 @@ namespace University.ViewModels
             _researchProject.EndDate = EndDate;
             _researchProject.Budget = Budget;
 
-            _context.Entry(_researchProject).State = EntityState.Modified;
-            _context.SaveChanges();
+            _databaseService.UpdateResearchProject(_researchProject);
 
             Response = "Data Saved";
         }
@@ -327,7 +329,8 @@ namespace University.ViewModels
             {
                 return;
             }
-            _researchProject = _context.ResearchProjects.Find(ProjectId);
+            _researchProject = _databaseService.FindResearchProject(ProjectId);
+
             if (_researchProject is null)
             {
                 return;

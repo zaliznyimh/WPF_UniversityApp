@@ -17,6 +17,7 @@ public class FacultyMemberViewModel : ViewModelBase
 {
     private readonly UniversityContext _context;
     private readonly IDialogService _dialogService;
+    private readonly IDatabaseService _databaseService;
 
     private bool? dialogResult;
     public bool? DialogResult
@@ -67,7 +68,7 @@ public class FacultyMemberViewModel : ViewModelBase
         var instance = MainWindowViewModel.Instance();
         if (instance is not null)
         {
-            instance.FacultyMemberSubView = new AddFacultyMemberViewModel(_context, _dialogService);
+            instance.FacultyMemberSubView = new AddFacultyMemberViewModel(_context, _dialogService, _databaseService);
         }
     }
 
@@ -89,7 +90,7 @@ public class FacultyMemberViewModel : ViewModelBase
         if (obj is not null)
         {
             long facultyMemberId = (long)obj;
-            EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(_context, _dialogService)
+            EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(_context, _dialogService, _databaseService)
             {
                 FacultyMemberId = facultyMemberId
             };
@@ -118,27 +119,16 @@ public class FacultyMemberViewModel : ViewModelBase
     {
         if (obj is not null)
         {
-            long facultyMemberId = (long)obj;
-            FacultyMember? facultyMember = _context.FacultyMembers.Find(facultyMemberId);
-            if (facultyMember is not null)
-            {
-                DialogResult = _dialogService.Show(facultyMember.Name);
-                if (DialogResult == false)
-                {
-                    return;
-                }
-
-                _context.FacultyMembers.Remove(facultyMember);
-                _context.SaveChanges();
-            }
+            _databaseService.RemoveFacultyMember(obj);
         }
     }
 
     // Ctor
-    public FacultyMemberViewModel(UniversityContext context, IDialogService dialogService)
+    public FacultyMemberViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
     {
         _context = context;
         _dialogService = dialogService;
+        _databaseService = databaseService;
 
         _context.Database.EnsureCreated();
         _context.FacultyMembers.Load();

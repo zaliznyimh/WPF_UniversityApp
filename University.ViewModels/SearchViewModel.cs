@@ -453,7 +453,7 @@ public class SearchViewModel : ViewModelBase
             else if (FirstCondition == "attended by FacultyMember with name")
             {
                 long facultyMemberId = (long)obj;
-                EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(_context, _dialogService)
+                EditFacultyMemberViewModel editFacultyMemberViewModel = new EditFacultyMemberViewModel(_context, _dialogService, _databaseService)
                 {
                     FacultyMemberId = facultyMemberId
                 };
@@ -467,7 +467,7 @@ public class SearchViewModel : ViewModelBase
             else if (FirstCondition == "with title")
             {
                 long researchProjectId = (long)obj;
-                EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(_context, _dialogService)
+                EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(_context, _dialogService, _databaseService)
                 {
                     ProjectId = researchProjectId
                 };

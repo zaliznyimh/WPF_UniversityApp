@@ -13,6 +13,7 @@ namespace University.ViewModels
     {
         private readonly UniversityContext _context;
         private readonly IDialogService _dialogService;
+        private readonly IDatabaseService _databaseService;
 
         private bool? dialogResult;
         public bool? DialogResult
@@ -64,7 +65,7 @@ namespace University.ViewModels
             var instance = MainWindowViewModel.Instance();
             if (instance is not null)
             {
-                instance.ResearchProjectSubView = new AddResearchProjectViewModel(_context, _dialogService);
+                instance.ResearchProjectSubView = new AddResearchProjectViewModel(_context, _dialogService, _databaseService);
             }
         }
 
@@ -86,7 +87,7 @@ namespace University.ViewModels
             if (obj is not null)
             {
                 long projectId = (long)obj;
-                EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(_context, _dialogService)
+                EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(_context, _dialogService, _databaseService)
                 {
                     ProjectId = projectId
                 };
@@ -115,27 +116,16 @@ namespace University.ViewModels
         {
             if (obj is not null)
             {
-                long projectId = (long)obj;
-                ResearchProject? researchProject = _context.ResearchProjects.Find(projectId);
-                if (researchProject is not null)
-                {
-                    DialogResult = _dialogService.Show(researchProject.Title);
-                    if (DialogResult == false)
-                    {
-                        return;
-                    }
-
-                    _context.ResearchProjects.Remove(researchProject);
-                    _context.SaveChanges();
-                }
+                _databaseService.RemoveResearchProject(obj);
             }
         }
 
         // Ctor
-        public ResearchProjectViewModel(UniversityContext context, IDialogService dialogService)
+        public ResearchProjectViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
         {
             _context = context;
             _dialogService = dialogService;
+            _databaseService = databaseService;
 
             _context.Database.EnsureCreated();
             _context.ResearchProjects.Load();

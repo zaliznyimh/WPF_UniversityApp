@@ -17,12 +17,15 @@ public class EditFacultyMemberViewModel : ViewModelBase
 {
     private readonly UniversityContext _context;
     private readonly IDialogService _dialogService;
+    private readonly IDatabaseService _databaseService;
+
     private FacultyMember? _facultyMember = new FacultyMember();
 
-    public EditFacultyMemberViewModel(UniversityContext context, IDialogService dialogService)
+    public EditFacultyMemberViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
     {
         _context = context;
         _dialogService = dialogService;
+        _databaseService = databaseService;
     }
 
     public string Error => string.Empty;
@@ -215,7 +218,7 @@ public class EditFacultyMemberViewModel : ViewModelBase
         var instance = MainWindowViewModel.Instance();
         if (instance is not null)
         {
-            instance.FacultyMemberSubView = new FacultyMemberViewModel(_context, _dialogService);
+            instance.FacultyMemberSubView = new FacultyMemberViewModel(_context, _dialogService, _databaseService);
         }
     }
 
@@ -253,8 +256,7 @@ public class EditFacultyMemberViewModel : ViewModelBase
         _facultyMember.Email = Email;
         _facultyMember.OfficeRoomNumber = OfficeRoomNumber;
 
-        _context.Entry(_facultyMember).State = EntityState.Modified;
-        _context.SaveChanges();
+        _databaseService.UpdateFacultyMember(_facultyMember);
 
         Response = "Data Saved";
     }
@@ -264,7 +266,8 @@ public class EditFacultyMemberViewModel : ViewModelBase
         var facultyMembers = _context.FacultyMembers;
         if (facultyMembers is not null)
         {
-            _facultyMember = facultyMembers.Find(FacultyMemberId);
+            _facultyMember = _databaseService.FindFacultyMember(FacultyMemberId);
+
             if (_facultyMember is null)
             {
                 return;

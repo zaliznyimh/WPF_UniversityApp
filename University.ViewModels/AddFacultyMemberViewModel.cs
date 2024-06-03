@@ -16,6 +16,7 @@ public class AddFacultyMemberViewModel : ViewModelBase
 {
     private readonly UniversityContext _context;
     private readonly IDialogService _dialogService;
+    private readonly IDatabaseService _databaseService;
 
     public string Error
     {
@@ -209,7 +210,7 @@ public class AddFacultyMemberViewModel : ViewModelBase
         var instance = MainWindowViewModel.Instance();
         if (instance is not null)
         {
-            instance.FacultyMemberSubView = new FacultyMemberViewModel(_context, _dialogService);
+            instance.FacultyMemberSubView = new FacultyMemberViewModel(_context, _dialogService, _databaseService);
         }
     }
 
@@ -245,8 +246,7 @@ public class AddFacultyMemberViewModel : ViewModelBase
             OfficeRoomNumber = this.OfficeRoomNumber
         };
 
-        _context.FacultyMembers.Add(facultyMember);
-        _context.SaveChanges();
+        _databaseService.SaveFacultyMember(facultyMember);
 
         Response = "Data Saved";
     }
@@ -275,9 +275,10 @@ public class AddFacultyMemberViewModel : ViewModelBase
     /// </summary>
     /// <param name="context"></param>
     /// <param name="dialogService"></param>
-    public AddFacultyMemberViewModel(UniversityContext context, IDialogService dialogService)
+    public AddFacultyMemberViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
     {
         _context = context;
         _dialogService = dialogService;
+        _databaseService = databaseService;
     }
 }

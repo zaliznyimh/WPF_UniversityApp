@@ -14,6 +14,7 @@ namespace University.Services;
 public class DatabaseService : IDatabaseService
 {
     #region Properties and Ctor
+
     private readonly UniversityContext _context;
     private readonly IDialogService _dialogService;
 
@@ -76,8 +77,85 @@ public class DatabaseService : IDatabaseService
         _context.SaveChanges();
     }
 
-
-
     #endregion BooksMethods
+
+    #region FacultyMember Methods
+    public void RemoveFacultyMember(object obj)
+    {
+        long facultyMemberId = (long)obj;
+        FacultyMember facultyMember = _context.FacultyMembers.Find(facultyMemberId);
+        if (facultyMember is not null)
+        {
+            DialogResult = _dialogService.Show(facultyMember.Name);
+            if (DialogResult == false)
+            {
+                return;
+            }
+
+            _context.FacultyMembers.Remove(facultyMember);
+            _context.SaveChanges();
+        }
+    }
+
+    public void SaveFacultyMember(FacultyMember facultyMember)
+    {
+        _context.FacultyMembers.Add(facultyMember);
+        _context.SaveChanges();
+    }
+
+    public FacultyMember FindFacultyMember(long FacultyMemberId)
+    {
+        var findedFacultyMember = new FacultyMember();
+        findedFacultyMember = _context.FacultyMembers.Find(FacultyMemberId);
+        return findedFacultyMember;
+    }
+
+    public void UpdateFacultyMember(FacultyMember facultyMember)
+    {
+
+        _context.Entry(facultyMember).State = EntityState.Modified;
+        _context.SaveChanges();
+    }
+
+    #endregion //FacultyMember Methods
+
+    #region ResearchProject Methods
+    public void RemoveResearchProject(object obj)
+    {
+        long projectId = (long)obj;
+        ResearchProject researchProject = _context.ResearchProjects.Find(projectId);
+        if (researchProject is not null)
+        {
+            DialogResult = _dialogService.Show(researchProject.Title);
+            if (DialogResult == false)
+            {
+                return;
+            }
+
+            _context.ResearchProjects.Remove(researchProject);
+            _context.SaveChanges();
+        }
+    }
+
+    public void SaveResearchProject(ResearchProject researchProject)
+    {
+        _context.ResearchProjects.Add(researchProject);
+        _context.SaveChanges();
+    }
+
+    public ResearchProject FindResearchProject(long researchProjectID)
+    {
+        var findedResearchProject = new ResearchProject();
+        findedResearchProject = _context.ResearchProjects.Find(researchProjectID);
+        return findedResearchProject;
+    }
+
+    public void UpdateResearchProject(ResearchProject researchProject)
+    {
+        _context.Entry(researchProject).State = EntityState.Modified;
+        _context.SaveChanges();
+    }
+
+    #endregion // ResearchProject Methods
 
 }

@@ -15,6 +15,7 @@ namespace University.ViewModels
     {
         private readonly UniversityContext _context;
         private readonly IDialogService _dialogService;
+        private readonly IDatabaseService _databaseService;
 
         public string Error
         {
@@ -226,7 +227,7 @@ namespace University.ViewModels
             var instance = MainWindowViewModel.Instance();
             if (instance is not null)
             {
-                instance.ResearchProjectSubView = new ResearchProjectViewModel(_context, _dialogService);
+                instance.ResearchProjectSubView = new ResearchProjectViewModel(_context, _dialogService, _databaseService);
             }
         }
 
@@ -262,8 +263,7 @@ namespace University.ViewModels
                 Supervisor = AssignedFacultyMembers?.Where(s => s.IsSelected).ToList()
             };
 
-            _context.ResearchProjects.Add(researchProject);
-            _context.SaveChanges();
+            _databaseService.SaveResearchProject(researchProject);
 
             Response = "Data Saved";
         }
@@ -303,10 +303,11 @@ namespace University.ViewModels
         /// </summary>
         /// <param name="context"></param>
         /// <param name="dialogService"></param>
-        public AddResearchProjectViewModel(UniversityContext context, IDialogService dialogService)
+        public AddResearchProjectViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
         {
             _context = context;
             _dialogService = dialogService;
+            _databaseService = databaseService;
         }
     }
 }
