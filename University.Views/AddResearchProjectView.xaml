@@ -14,7 +14,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition />
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -94,5 +94,5 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </GroupBox>
-    </Grid>
+    </Grid> 
 </UserControl>

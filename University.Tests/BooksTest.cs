@@ -15,6 +15,7 @@ namespace University.Tests
     [TestClass]
     public class BooksTest
     {
+        private IDatabaseService _databaseService;
         private IDialogService _dialogService;
         private DbContextOptions<UniversityContext> _options;
         private Mock<IDialogService> _dialogServiceMock;

@@ -15,6 +15,8 @@ namespace University.ViewModels
     {
         private readonly UniversityContext _context;
         private readonly IDialogService _dialogService;
+        private readonly IDatabaseService _databaseService;
+
         private Book? _book = new Book();
 
         public string Error
@@ -196,7 +198,7 @@ namespace University.ViewModels
             var instance = MainWindowViewModel.Instance();
             if (instance is not null)
             {
-                instance.BooksSubView = new BooksViewModel(_context, _dialogService);
+                instance.BooksSubView = new BooksViewModel(_context, _dialogService, _databaseService);
             }
         }
 
@@ -232,16 +234,16 @@ namespace University.ViewModels
             _book.Genre = Genre;
             _book.Description = Description;
 
-            _context.Entry(_book).State = EntityState.Modified;
-            _context.SaveChanges();
+            _databaseService.UpdateBook(_book);
 
             Response = "Data Updated";
         }
 
-        public EditBookViewModel(UniversityContext context, IDialogService dialogService)
+        public EditBookViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
         {
             _context = context;
             _dialogService = dialogService;
+            _databaseService = databaseService;
         }
 
         private bool IsValid()
@@ -263,7 +265,7 @@ namespace University.ViewModels
             {
                 return;
             }
-            _book = _context.Books.Find(BookId);
+            _book = _databaseService.FindBook(BookId);
             if (_book is null)
             {
                 return;

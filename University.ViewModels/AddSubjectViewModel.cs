@@ -252,7 +252,7 @@ public class AddSubjectViewModel : ViewModelBase, IDataErrorInfo
         _dialogService = dialogService;
     }
 
-    private ObservableCollection<Student> LoadStudents()
+    public ObservableCollection<Student> LoadStudents()
     {
         _context.Database.EnsureCreated();
         _context.Students.Load();

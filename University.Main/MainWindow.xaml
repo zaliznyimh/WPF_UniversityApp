@@ -19,19 +19,19 @@
             <TabItem Header="Students" Tag="&#xE779;">
                 <ContentControl Content="{Binding StudentsSubView}" />
             </TabItem>
-            <TabItem Header="Subjects" Tag="&#xE82D;">
+            <TabItem Header="Subjects" Tag="&#xE193;">
                 <ContentControl Content="{Binding SubjectsSubView}" />
             </TabItem>
-            <TabItem Header="Books" Tag="&#xE773;">
+            <TabItem Header="Books" Tag="&#xE82D;">
                 <ContentControl Content="{Binding BooksSubView}" />
             </TabItem>
-            <TabItem Header="FacultyMembers" Tag="&#xE82D;">
+            <TabItem Header="FacultyMembers" Tag="&#xE181;">
                 <ContentControl Content="{Binding FacultyMemberSubView}" />
             </TabItem>
             <TabItem Header="ResearchProjects" Tag="&#xE773;">
                 <ContentControl Content="{Binding ResearchProjectSubView}" />
             </TabItem>
-            <TabItem Header="Search" Tag="&#xE773;">
+            <TabItem Header="Search" Tag="&#xe11A;">
                 <ContentControl Content="{Binding SearchSubView}" />
             </TabItem>
         </TabControl>

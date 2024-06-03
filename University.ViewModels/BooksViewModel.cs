@@ -12,6 +12,7 @@ namespace University.ViewModels
     {
         private readonly UniversityContext _context;
         private readonly IDialogService _dialogService;
+        private readonly IDatabaseService _databaseService;
 
         private bool? _dialogResult = null;
         public bool? DialogResult
@@ -63,7 +64,7 @@ namespace University.ViewModels
             var instance = MainWindowViewModel.Instance();
             if (instance is not null)
             {
-                instance.BooksSubView = new AddBookViewModel(_context, _dialogService);
+                instance.BooksSubView = new AddBookViewModel(_context, _dialogService, _databaseService);
 
             }
         }
@@ -86,7 +87,7 @@ namespace University.ViewModels
             if (obj is not null)
             {
                 long bookId = (long)obj;
-                EditBookViewModel editBookViewModel = new EditBookViewModel(_context, _dialogService)
+                EditBookViewModel editBookViewModel = new EditBookViewModel(_context, _dialogService, _databaseService)
                 {
                     BookId = bookId
                 };
@@ -114,27 +115,16 @@ namespace University.ViewModels
         private void RemoveBook(object? obj)
         {
             if (obj is not null)
-            {
-                long bookId = (long)obj;
-                Book? book = _context.Books.Find(bookId);
-                if (book is not null)
-                {
-                    DialogResult = _dialogService.Show(book.Title);
-                    if (DialogResult == false)
-                    {
-                        return;
-                    }
-
-                    _context.Books.Remove(book);
-                    _context.SaveChanges();
-                }
+            {   
+                _databaseService.RemoveBook(obj);
             }
         }
 
-        public BooksViewModel(UniversityContext context, IDialogService dialogService)
+        public BooksViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
         {
             _context = context;
             _dialogService = dialogService;
+            _databaseService = databaseService; 
 
             _context.Database.EnsureCreated();
             _context.Books.Load();

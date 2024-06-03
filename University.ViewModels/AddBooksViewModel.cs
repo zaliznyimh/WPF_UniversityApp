@@ -15,6 +15,7 @@ namespace University.ViewModels
     {
         private readonly UniversityContext _context;
         private readonly IDialogService _dialogService;
+        private readonly IDatabaseService _databaseService;
 
         public string Error
         {
@@ -162,25 +163,6 @@ namespace University.ViewModels
             }
         }
 
-        private ObservableCollection<Subject>? _assignedSubjects = null;
-        public ObservableCollection<Subject>? AssignedSubjects
-        {
-            get
-            {
-                if (_assignedSubjects is null)
-                {
-                    _assignedSubjects = LoadSubjects();
-                    return _assignedSubjects;
-                }
-                return _assignedSubjects;
-            }
-            set
-            {
-                _assignedSubjects = value;
-                OnPropertyChanged(nameof(AssignedSubjects));
-            }
-        }
-
         private ICommand? _back = null;
         public ICommand? Back
         {
@@ -199,7 +181,7 @@ namespace University.ViewModels
             var instance = MainWindowViewModel.Instance();
             if (instance is not null)
             {
-                instance.BooksSubView = new BooksViewModel(_context, _dialogService);
+                instance.BooksSubView = new BooksViewModel(_context, _dialogService, _databaseService);
             }
         }
 
@@ -234,23 +216,16 @@ namespace University.ViewModels
                 Description = this.Description
             };
 
-            _context.Books.Add(book);
-            _context.SaveChanges();
+            _databaseService.SaveBook(book);
 
             Response = "Data Saved";
         }
 
-        public AddBookViewModel(UniversityContext context, IDialogService dialogService)
+        public AddBookViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
         {
             _context = context;
             _dialogService = dialogService;
-        }
-
-        private ObservableCollection<Subject> LoadSubjects()
-        {
-            _context.Database.EnsureCreated();
-            _context.Subjects.Load();
-            return _context.Subjects.Local.ToObservableCollection();
+            _databaseService = databaseService;
         }
 
         private bool IsValid()

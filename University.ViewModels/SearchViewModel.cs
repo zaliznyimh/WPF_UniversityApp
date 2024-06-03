@@ -12,6 +12,7 @@ public class SearchViewModel : ViewModelBase
 {
     private readonly UniversityContext _context;
     private readonly IDialogService _dialogService;
+    private readonly IDatabaseService _databaseService;
 
     private bool? _dialogResult = null;
     public bool? DialogResult
@@ -375,14 +376,17 @@ public class SearchViewModel : ViewModelBase
                     .Include(s => s.Supervisor)
                     .ToList();
 
-                var supervisorName = researchProject.Supervisor.Select(s => s.Name).ToList();
+                var supervisorName = researchProject.Supervisor?.Select(s => s.Name).ToList();
 
-                var filteredResearchProjects = researchProjects
-                    .Where(rp => rp.Supervisor != null && rp.Supervisor.Any(f => supervisorName.Contains(f.Name)))
-                    .ToList();
+                if (supervisorName is not null)
+                {
+                    var filteredResearchProjects = researchProjects
+                        .Where(rp => rp.Supervisor != null && rp.Supervisor.Any(f => supervisorName.Contains(f.Name)))
+                        .ToList();
 
                 ResearchProjects = new ObservableCollection<ResearchProject>(filteredResearchProjects);
                 AreResearchProjectVisible = true;
+                }
             }
         }
     }
@@ -435,7 +439,7 @@ public class SearchViewModel : ViewModelBase
             else if (FirstCondition == "with ISBN")
             {
                 long bookId = (long)obj;
-                EditBookViewModel editBookViewModel = new EditBookViewModel(_context, _dialogService)
+                EditBookViewModel editBookViewModel = new EditBookViewModel(_context, _dialogService, _databaseService)
                 {
                     BookId = bookId
                 };
@@ -578,10 +582,11 @@ public class SearchViewModel : ViewModelBase
         }
     }
 
-    public SearchViewModel(UniversityContext context, IDialogService dialogService)
+    public SearchViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
     {
         _context = context;
         _dialogService = dialogService;
+        _databaseService = databaseService;
 
         IsVisible = false;
         AreStudentsVisible = false;

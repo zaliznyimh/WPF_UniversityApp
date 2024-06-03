@@ -13,6 +13,7 @@ public class EditSubjectViewModel : ViewModelBase, IDataErrorInfo
 {
     private readonly UniversityContext _context;
     private readonly IDialogService _dialogService;
+
     private Subject? _subject = new Subject();
 
     public string Error => string.Empty;
