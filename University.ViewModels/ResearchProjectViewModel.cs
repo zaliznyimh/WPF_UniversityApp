@@ -120,7 +120,6 @@ namespace University.ViewModels
             }
         }
 
-        // Ctor
         public ResearchProjectViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
         {
             _context = context;

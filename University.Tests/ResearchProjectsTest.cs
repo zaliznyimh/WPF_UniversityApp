@@ -135,7 +135,6 @@ public class ResearchProjectsTest
             // Assert
             bool isNewResearchProjectExist = _context.ResearchProjects.Any(rp => rp.Title == "Study of Urbanization Trends" && rp.Budget == 4500 && rp.Supervisor.Any());
             Assert.IsFalse(isNewResearchProjectExist);
-
     }
 
     [TestMethod]
@@ -159,6 +158,70 @@ public class ResearchProjectsTest
             // Assert
             var editedtResearchProject = _context.ResearchProjects.Find((long)1);
             Assert.AreEqual(9500, editedtResearchProject.Budget);
+        }
+    }
+
+    [TestMethod]
+    public void EditResearchProject_ValidResearchProjectPropertiesWithFacultyMember_ReturnTrue()
+    {
+        using (UniversityContext context = new UniversityContext(_options))
+        {
+            // Arrrange
+            long IdResearchProjectToEdit = 1;
+            long IdFacultyMember = 2;
+            FacultyMember facultyMember = _context.FacultyMembers.Find(IdFacultyMember);
+            facultyMember.IsSelected = true;
+            var researchProjectEdit = context.ResearchProjects.Find(IdResearchProjectToEdit);
+
+            // Act
+            EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService)
+            {
+                ProjectId = 1,
+                Budget = 9500,
+                AssignedFacultyMembers = new ObservableCollection<FacultyMember>
+                {
+                    facultyMember
+                }
+            };
+
+            editResearchProjectViewModel.Save.Execute(null);
+
+            // Assert
+            var editedtResearchProject = _context.ResearchProjects.Find((long)1);
+            Assert.AreEqual(9500, editedtResearchProject.Budget);
+        }
+    }
+
+    [TestMethod]
+    public void EditResearchProject_InvalidResearchProjectPropertiesWithFacultyMember_ReturnFalse()
+    {
+        using (UniversityContext context = new UniversityContext(_options))
+        {
+            // Arrrange
+            long IdResearchProjectToEdit = 1;
+            long IdFacultyMember = 2;
+            FacultyMember facultyMember = _context.FacultyMembers.Find(IdFacultyMember);
+            facultyMember.IsSelected = true;
+            var viewModel = new ResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService);
+            var researchProjectEdit = context.ResearchProjects.Find(IdResearchProjectToEdit);
+
+            // Act
+            EditResearchProjectViewModel editResearchProjectViewModel = new EditResearchProjectViewModel(context, _dialogServiceMock.Object, _databaseService)
+            {
+                ProjectId = 3,
+                Budget = 9500,
+                AssignedFacultyMembers = new ObservableCollection<FacultyMember>
+                {
+                    facultyMember
+                }
+            };
+
+            editResearchProjectViewModel.Save.Execute(researchProjectEdit);
+            viewModel.Edit.Execute(researchProjectEdit.ProjectId);
+
+            // Assert
+            var editedtResearchProject = context.ResearchProjects.Find(IdResearchProjectToEdit);
+            Assert.AreNotEqual(9500, editedtResearchProject.Budget);
         }
     }
 
@@ -223,6 +286,7 @@ public class ResearchProjectsTest
         }
     }
 
+    [TestMethod]
     public void AddNewResearchProject_ValidMemberPropeties_ReturnMessageDataSaved()
     {
         using UniversityContext context = new UniversityContext(_options);

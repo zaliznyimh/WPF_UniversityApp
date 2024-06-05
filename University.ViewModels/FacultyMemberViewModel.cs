@@ -123,7 +123,6 @@ public class FacultyMemberViewModel : ViewModelBase
         }
     }
 
-    // Ctor
     public FacultyMemberViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
     {
         _context = context;

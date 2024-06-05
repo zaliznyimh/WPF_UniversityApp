@@ -261,7 +261,6 @@ public class AddFacultyMemberViewModel : ViewModelBase
                 return false;
             }
         }
-
         if (this.Age <= 0)
         {
             return false;
@@ -270,11 +269,6 @@ public class AddFacultyMemberViewModel : ViewModelBase
         return true;
     }
 
-    /// <summary>
-    /// Ctor
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="dialogService"></param>
     public AddFacultyMemberViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
     {
         _context = context;

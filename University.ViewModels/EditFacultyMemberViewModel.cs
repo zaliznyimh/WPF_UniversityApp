@@ -18,7 +18,6 @@ public class EditFacultyMemberViewModel : ViewModelBase
     private readonly UniversityContext _context;
     private readonly IDialogService _dialogService;
     private readonly IDatabaseService _databaseService;
-
     private FacultyMember? _facultyMember = new FacultyMember();
 
     public EditFacultyMemberViewModel(UniversityContext context, IDialogService dialogService, IDatabaseService databaseService)
@@ -29,7 +28,7 @@ public class EditFacultyMemberViewModel : ViewModelBase
     }
 
     public string Error => string.Empty;
-
+        
     public string this[string columnName]
     {
         get

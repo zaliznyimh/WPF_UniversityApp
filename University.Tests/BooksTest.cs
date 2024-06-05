@@ -82,8 +82,8 @@ namespace University.Tests
 
                 // Act
                 addBookViewModel.Save.Execute(null);
-                bool newBookExists = context.Books.Any(b => b.Title == "New Book Title" && b.Author == "New Author" && b.Publisher == "New Publisher" && b.ISBN == "New ISBN" && b.Genre == "New Genre" && b.Description == "New Description");
-
+                bool newBookExists = context.Books.Any(b => b.Title == "New Book Title" && b.Author == "New Author" && b.Publisher == "New Publisher" 
+                                                          && b.ISBN == "New ISBN" && b.Genre == "New Genre" && b.Description == "New Description");
                 // Assert
                 Assert.IsTrue(newBookExists);
             }
@@ -106,7 +106,9 @@ namespace University.Tests
                 // Act
 
                 addBookViewModel.Save.Execute(null);
-                bool newBookExists = context.Books.Any(b => b.Author == "Author without Title" && b.Publisher == "Publisher without Title" && b.ISBN == "ISBN without Title" && b.Genre == "Genre without Title" && b.Description == "Description without Title");
+                bool newBookExists = context.Books.Any(b => b.Author == "Author without Title" && b.Publisher == "Publisher without Title" && b.ISBN == "ISBN without Title"
+                                                          && b.Genre == "Genre without Title" && b.Description == "Description without Title");
+                    
                 // Assert
                 Assert.IsFalse(newBookExists);
             }
@@ -217,7 +219,6 @@ namespace University.Tests
 
                 // Assert
                 Assert.AreEqual("Data Saved", viewModel.Response);
-
             }
         }
 
